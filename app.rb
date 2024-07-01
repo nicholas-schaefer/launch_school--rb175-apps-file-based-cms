@@ -21,6 +21,21 @@ get '/' do
   erb :index
 end
 
+get '/:file' do
+  absolute_path = ROOT + "/data/" + params[:file]
+  # "<p>this route works!</p>"
+
+  if File.exist?(absolute_path)
+    headers \
+      "Content-Type" => "text/plain"
+    body \
+      File.read(absolute_path)
+  else
+    erb :page_not_found
+  end
+end
+
+
 # File.file?(paths[-1])
 
 
