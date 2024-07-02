@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require "tilt/erubis"
-require 'pry'
+# require 'pry'
 
 before do
   ROOT = File.expand_path("..", __FILE__)
