@@ -10,6 +10,11 @@
   <header>
     <h1>My awesome app</h1>
   </header>
+    <% if @error %>
+      <div id="msg">
+        <p><%== session[:previous_path] %> does not exist!!</p>
+      </div>
+    <% end %>
   <section>
     <%= yield %>
   </section>

@@ -1,1 +1,5 @@
-<p>404: page not found</p>
+<p><a href="/">homepage</a></p>
+
+<% content_for :flash_message do %>
+  <p><%== @path%> does not exist.</p>
+<% end %>
