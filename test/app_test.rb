@@ -18,6 +18,7 @@ class AppTest < Minitest::Test
     get "/"
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+    assert_includes last_response.body, "about.md"
     assert_includes last_response.body, "about.txt"
     assert_includes last_response.body, "changes.txt"
     assert_includes last_response.body, "history.txt"
@@ -54,5 +55,13 @@ class AppTest < Minitest::Test
 
     get "/" # Reload the page
     refute_includes last_response.body, "notafile.ext does not exist" # Assert that our message has been removed
+  end
+
+  def test_viewing_markdown_document
+    get "/about.md"
+
+    assert_equal 200, last_response.status
+    assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+    assert_includes last_response.body, "<h1>A Markdown file</h1>"
   end
 end

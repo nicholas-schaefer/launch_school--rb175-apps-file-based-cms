@@ -3,13 +3,13 @@ require 'sinatra/reloader' if development?
 # require "sinatra/content_for"
 
 require "tilt/erubis"
+require "redcarpet"
 require 'pry'
 
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
 end
-
 
 before do
   ROOT = File.expand_path("..", __FILE__)
@@ -41,34 +41,61 @@ def homepage()
   body erb :index
 end
 
+def file_type_markdown?
+end
+
+# render markdown file extensions
+# get /[\/].+[.]md/ do
+#   headers \
+#     "Content-Type" => "text/markdown"
+#   body \
+#     erb "markdown found!!!!"
+#   markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+#   markdown.render("# This will be a headline!")
+# end
+
 get '/' do
-  # status_code = session[:flash_messages].empty? ? 200 : 404
   homepage()
 end
 
+def handle_extension(absolute_path)
+  case File.extname(absolute_path)
+  when ".md" then render_extension_md(absolute_path)
+  else            render_extension_txt(absolute_path)
+  end
+end
+
+def render_extension_md(absolute_path)
+  headers \
+    "Content-Type" => "text/html;charset=utf-8"
+  body \
+    markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+    markdown.render(File.read(absolute_path))
+end
+
+def render_extension_txt(absolute_path)
+  headers \
+    "Content-Type" => "text/plain"
+  body \
+    File.read(absolute_path)
+end
+
+def handle404_page_not_found(path)
+  session[:previous_path] = path
+  session[:flash_messages][0] = "#{path} does not exist."
+
+  status 404
+  redirect "/"
+end
+
 get '/:file' do
-  @path = params[:file]
-  absolute_path = ROOT + "/data/" + @path
-  # "<p>this route works!</p>"
+  path = params[:file]
+  absolute_path = ROOT + "/data/" + path
 
   if File.exist?(absolute_path)
-    headers \
-      "Content-Type" => "text/plain"
-    body \
-      File.read(absolute_path)
+    handle_extension(absolute_path)
   else
-    session[:previous_path] = @path
-    session[:flash_messages][0] = "#{@path} does not exist."
-
-    status 404
-    redirect "/"
-    # status    404
-    # body      homepage()
-
-    # headers
-    # body      erb :page_not_found
-    # body      erb :index
-
+    handle404_page_not_found(path)
   end
 end
 
