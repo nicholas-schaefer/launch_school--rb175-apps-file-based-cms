@@ -64,4 +64,27 @@ class AppTest < Minitest::Test
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
     assert_includes last_response.body, "<h1>A Markdown file</h1>"
   end
+
+  # test/cms_test.rb
+  def test_editing_document
+    get "/changes.txt/edit"
+
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "<textarea"
+    assert_includes last_response.body, %q(<input type="submit")
+  end
+
+  def test_updating_document
+    post "/files/changes.txt", editable_content: "new content"
+
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+
+    assert_includes last_response.body, "The file 'changes.txt' has been updated"
+
+    get "/changes.txt"
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "new content"
+  end
 end

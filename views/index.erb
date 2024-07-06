@@ -4,6 +4,7 @@
   <% @files.each do |file_path| %>
   <li>
     <a href="/<%= base_name(file_path) %>"><%= base_name(file_path) %></a>
+    <a href="/<%= base_name(file_path) %>/edit">edit</a>
   </li>
   <% end %>
 </ul>

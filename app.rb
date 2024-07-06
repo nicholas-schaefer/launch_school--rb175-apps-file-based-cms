@@ -58,6 +58,10 @@ get '/' do
   homepage()
 end
 
+get '/favicon.ico' do
+  status 404
+end
+
 def handle_extension(absolute_path)
   case File.extname(absolute_path)
   when ".md" then render_extension_md(absolute_path)
@@ -92,11 +96,53 @@ get '/:file' do
   path = params[:file]
   absolute_path = ROOT + "/data/" + path
 
+  # path_without_extension = File.basename(path, ".*")
+  # if path_without_extension == "edit"
+  #   erb "<p>edit request</p>"
+  # end
+  # binding.pry
   if File.exist?(absolute_path)
     handle_extension(absolute_path)
   else
     handle404_page_not_found(path)
   end
+end
+
+get '/:file/edit' do
+  path = params[:file]
+  absolute_path = ROOT + "/data/" + path
+
+  if File.exist?(absolute_path)
+    @file = File.read(absolute_path)
+    @file_name = path
+    erb :edit
+  else
+    handle404_page_not_found(path)
+  end
+end
+
+# Post request from form updating page text
+post '/files/:file' do
+  path = params[:file]
+  absolute_path = ROOT + "/data/" + path
+
+  if File.exist?(absolute_path)
+    # erb "<p>post request submitted to #{params[:file]}</p>"
+    # @file = File.read(absolute_path)
+    # @file_name = path
+    # erb :edit
+
+    File.open(absolute_path, mode = 'w') do |f|
+      f.write(params[:editable_content])
+    end
+
+    session[:success] = "The file '#{params[:file]}' has been updated."
+    redirect "/#{params[:file]}/edit"
+  else
+    #this ideally should be updated
+    handle404_page_not_found(path)
+  end
+  # erb "<p>post request submitted to #{params[:file]}</p>"
 end
 
 
