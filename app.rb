@@ -9,9 +9,11 @@ require 'pry'
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
+  # set :environment, :production
 end
 
 before do
+  ENV["RACK_ENV"] = "development"
   session[:flash_messages]  ||= []
   session[:previous_path] ||= ""
 end
@@ -45,6 +47,7 @@ def homepage()
   paths = Dir[pattern]
 
   @files = paths.select { |path| File.file?(path)}
+  # binding.pry
 
   body erb :index
 end
