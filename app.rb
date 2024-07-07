@@ -12,7 +12,6 @@ configure do
 end
 
 before do
-  ROOT = File.expand_path("..", __FILE__)
   session[:flash_messages]  ||= []
   session[:previous_path] ||= ""
 end
@@ -31,11 +30,20 @@ helpers do
   end
 end
 
+def data_path
+  if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/data", __FILE__)
+  else
+    File.expand_path("../data", __FILE__)
+  end
+end
+
 def homepage()
   @error = session[:flash_messages].delete_at(0)
-  # session[:previous_path] = "muffin"
 
-  paths = Dir["#{ROOT}/data/*"]
+  pattern = File.join(data_path, "*")
+  paths = Dir[pattern]
+
   @files = paths.select { |path| File.file?(path)}
 
   body erb :index
@@ -94,7 +102,7 @@ end
 
 get '/:file' do
   path = params[:file]
-  absolute_path = ROOT + "/data/" + path
+  absolute_path = File.join(data_path, path)
 
   # path_without_extension = File.basename(path, ".*")
   # if path_without_extension == "edit"
@@ -110,7 +118,7 @@ end
 
 get '/:file/edit' do
   path = params[:file]
-  absolute_path = ROOT + "/data/" + path
+  absolute_path = File.join(data_path, path)
 
   if File.exist?(absolute_path)
     @file = File.read(absolute_path)
@@ -124,7 +132,8 @@ end
 # Post request from form updating page text
 post '/files/:file' do
   path = params[:file]
-  absolute_path = ROOT + "/data/" + path
+  absolute_path = File.join(data_path, path)
+
 
   if File.exist?(absolute_path)
     # erb "<p>post request submitted to #{params[:file]}</p>"
