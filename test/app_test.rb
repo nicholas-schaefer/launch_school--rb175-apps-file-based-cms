@@ -1,4 +1,4 @@
-ENV["RACK_ENV"] = "test"
+ENV["RACK_ENV"] = "hack_test" # this is weird hack I had to implement to get this work, defaults to test
 
 require "minitest/autorun"
 require "minitest/reporters"
@@ -18,6 +18,7 @@ class AppTest < Minitest::Test
 
   def setup
     FileUtils.mkdir_p(data_path)
+    # ENV["RACK_ENV"] = "test"
   end
 
   def teardown

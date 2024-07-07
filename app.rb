@@ -13,9 +13,13 @@ configure do
 end
 
 before do
-  ENV["RACK_ENV"] = "development"
+  # binding.pry
+  # ENV['APP_ENV'] = "development"
+  # ENV["RACK_ENV"] = "development"
   session[:flash_messages]  ||= []
   session[:previous_path] ||= ""
+  # ENV["APP_ENV"] ||= "development"
+  # ENV["APP_ENV"] =
 end
 
 helpers do
@@ -33,7 +37,9 @@ helpers do
 end
 
 def data_path
-  if ENV["RACK_ENV"] == "test"
+  File.expand_path("../data", __FILE__)
+  ENV["RACK_ENV"]
+  if ENV["RACK_ENV"] == "hack_test"
     File.expand_path("../test/data", __FILE__)
   else
     File.expand_path("../data", __FILE__)
