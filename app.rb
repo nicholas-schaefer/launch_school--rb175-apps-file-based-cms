@@ -72,10 +72,6 @@ get '/' do
   homepage()
 end
 
-get '/favicon.ico' do
-  status 404
-end
-
 def handle_extension(absolute_path)
   case File.extname(absolute_path)
   when ".md" then render_extension_md(absolute_path)
