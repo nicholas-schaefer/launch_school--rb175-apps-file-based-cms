@@ -1,0 +1,13 @@
+body {
+    padding: 1em;
+    font-family: sans-serif;
+}
+
+/* mark {
+    background: yellow;
+} */
+
+.message {
+    padding: 10px;
+    background: #FFFF99;
+}

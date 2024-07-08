@@ -58,9 +58,6 @@ def homepage()
   body erb :index
 end
 
-def file_type_markdown?
-end
-
 # render markdown file extensions
 # get /[\/].+[.]md/ do
 #   headers \
@@ -87,11 +84,16 @@ def handle_extension(absolute_path)
 end
 
 def render_extension_md(absolute_path)
-  headers \
-    "Content-Type" => "text/html;charset=utf-8"
+  # headers \
+  #   "Content-Type" => "text/html;charset=utf-8"
+  # body \
+  #   markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+  #   markdown.render(File.read(absolute_path))
+
+  markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+  @markdown_file_as_html = markdown.render(File.read(absolute_path))
   body \
-    markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-    markdown.render(File.read(absolute_path))
+    erb :markdown
 end
 
 def render_extension_txt(absolute_path)
@@ -151,7 +153,7 @@ post '/files/:file' do
     # erb :edit
 
     File.open(absolute_path, mode = 'w') do |f|
-      f.write(params[:editable_content])
+      f.write(h(params[:editable_content]))
     end
 
     session[:success] = "The file '#{params[:file]}' has been updated."

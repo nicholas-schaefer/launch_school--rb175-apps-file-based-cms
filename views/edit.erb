@@ -1,13 +1,12 @@
 <h2>getting started edit.erb page</h2>
 
 <% if session[:success] %>
-  <p><mark><%= session.delete(:success) %></mark></p>
+  <p class="message"><%= session.delete(:success) %></p>
 <% end %>
 
 <form action="/files/<%= @file_name %>" method="post">
   <p><label for="editable_content">Content to edit:</label></p>
-  <textarea id="editable_content" name="editable_content" rows="8" cols="50"><%== @file %></textarea>
+  <textarea id="editable_content" name="editable_content" rows="8" cols="50"><%= @file %></textarea>
   <br>
   <input type="submit" value="Update">
-  <input type="hidden" id="fileId" name="fileId" value="34657" />
 </form>
