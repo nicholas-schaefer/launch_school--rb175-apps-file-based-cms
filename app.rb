@@ -1,5 +1,5 @@
 require 'sinatra'
-require 'sinatra/reloader' if development?
+require 'sinatra/reloader'# unless ENV["RACK_ENV"] == "hack_test"# if (settings.development? || settings.test?)
 # require "sinatra/content_for"
 
 require "tilt/erubis"
@@ -107,6 +107,10 @@ def handle404_page_not_found(path)
   redirect "/"
 end
 
+get '/new' do
+  erb :new
+end
+
 get '/:file' do
   path = params[:file]
   absolute_path = File.join(data_path, path)
@@ -136,8 +140,13 @@ get '/:file/edit' do
   end
 end
 
+#if there's an unsuccessful post request to /files/new, we still want page reloads to work
+get '/files/new' do
+  redirect '/new', 301
+end
+
 # Post request from form updating page text
-post '/files/:file' do
+post '/files/edit/:file' do
   path = params[:file]
   absolute_path = File.join(data_path, path)
 
@@ -149,7 +158,10 @@ post '/files/:file' do
     # erb :edit
 
     File.open(absolute_path, mode = 'w') do |f|
-      f.write(h(params[:editable_content]))
+      case File.extname(absolute_path)
+      when ".md" then f.write(h(params[:editable_content]))
+      else            f.write(params[:editable_content])
+      end
     end
 
     session[:success] = "The file '#{params[:file]}' has been updated."
@@ -161,12 +173,38 @@ post '/files/:file' do
   # erb "<p>post request submitted to #{params[:file]}</p>"
 end
 
+# Post request from form updating page text
+post '/files/new' do
+  new_file_name = params[:new_doc]
+  new_file_name = new_file_name.strip
+  new_file_name = File.basename(new_file_name)
+  file_extension = File.extname(new_file_name)
 
-# File.file?(paths[-1])
+  absolute_path = File.join(data_path, new_file_name)
 
+  if new_file_name.empty?
+    session[:error] = "A name is required."
+    status 422
+    erb :new
+    # session[:error] = "A name is required."
+    # redirect '/new'
+  elsif file_extension.empty?
+    session[:error] = "An extension is required."
+    status 422
+    erb :new
+  else
+    if File.exist?(absolute_path)
+      session[:error] = "Unable to create file, file already exists"
+      redirect '/new'
+    end
 
-# Dir["./data/*"]
-# => ["./data/about.txt", "./data/changes.txt", "./data/history.txt"]
+    if File.open(absolute_path, "w")
+      session[:success] = "#{h(new_file_name)} was created."
+      redirect "/"
+    else
+      session[:error] = "Unable to create file, invalid file path"
+      redirect '/new'
+    end
+  end
 
-# Dir.entries("./data")
-# => ["..", "about.txt", "history.txt", "changes.txt", "."]
+end

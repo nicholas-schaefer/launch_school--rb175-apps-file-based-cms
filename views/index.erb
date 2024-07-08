@@ -1,4 +1,10 @@
-<p>getting started test.erb page</p>
+<h2>Homepage</h2>
+
+<% if session[:success] %>
+  <p class="message"><%= session.delete(:success) %></p>
+<% end %>
+
+<p><a href="/new">New Document</a></p>
 
 <ul>
   <% @files.each do |file_path| %>

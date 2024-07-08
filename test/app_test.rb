@@ -122,7 +122,7 @@ class AppTest < Minitest::Test
     create_document "changes.txt"
 
 
-    post "/files/changes.txt", editable_content: "new content"
+    post "/files/edit/changes.txt", editable_content: "new content"
 
     assert_equal 302, last_response.status
 
@@ -133,5 +133,34 @@ class AppTest < Minitest::Test
     get "/changes.txt"
     assert_equal 200, last_response.status
     assert_includes last_response.body, "new content"
+  end
+
+  # test/cms_test.rb
+  def test_view_new_document_form
+    # skip
+    get "/new"
+
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "<input"
+    assert_includes last_response.body, %q(<input type="submit")
+  end
+
+  def test_create_new_document
+    # skip
+    post "/files/new", new_doc: "test.txt"
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_includes last_response.body, "test.txt was created"
+
+    get "/"
+    assert_includes last_response.body, "test.txt"
+  end
+
+  def test_create_new_document_without_filename
+    # skip
+    post "/files/new", new_doc: ""
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "A name is required"
   end
 end
