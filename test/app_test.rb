@@ -135,7 +135,6 @@ class AppTest < Minitest::Test
     assert_includes last_response.body, "new content"
   end
 
-  # test/cms_test.rb
   def test_view_new_document_form
     # skip
     get "/new"
@@ -162,5 +161,20 @@ class AppTest < Minitest::Test
     post "/files/new", new_doc: ""
     assert_equal 422, last_response.status
     assert_includes last_response.body, "A name is required"
+  end
+
+  def test_delete_document
+    create_document "delete_me.txt"
+
+    get "/"
+    assert_includes last_response.body, "delete_me.txt"
+
+    post "files/delete/delete_me.txt"
+    assert_equal 302, last_response.status
+
+    assert_includes last_response.body, "The file 'delete_me.txt' has been deleted."
+
+    get "/"
+    refute_includes last_response.body, "The file 'delete_me.txt' has been deleted."
   end
 end

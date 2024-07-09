@@ -9,11 +9,11 @@ require 'pry'
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
+  enable :reloader
   # set :environment, :production
 end
 
 before do
-  # binding.pry
   # ENV['APP_ENV'] = "development"
   # ENV["RACK_ENV"] = "development"
   session[:flash_messages]  ||= []
@@ -53,7 +53,6 @@ def homepage()
   paths = Dir[pattern]
 
   @files = paths.select { |path| File.file?(path)}
-  # binding.pry
 
   body erb :index
 end
@@ -119,7 +118,6 @@ get '/:file' do
   # if path_without_extension == "edit"
   #   erb "<p>edit request</p>"
   # end
-  # binding.pry
   if File.exist?(absolute_path)
     handle_extension(absolute_path)
   else
@@ -144,6 +142,13 @@ end
 get '/files/new' do
   redirect '/new', 301
 end
+
+#http://127.0.0.1:4567/files/delete/hello.md.md
+#if there's an successful post request to /files/delete/*, we still want page reloads to work
+get '/files/delete/*.*' do
+  redirect '/', 301
+end
+
 
 # Post request from form updating page text
 post '/files/edit/:file' do
@@ -206,5 +211,24 @@ post '/files/new' do
       redirect '/new'
     end
   end
-
 end
+
+# Post request from form deleting a file
+post '/files/delete/:file' do
+  path = params[:file]
+  absolute_path = File.join(data_path, path)
+
+  if File.exist?(absolute_path)
+    File.delete(absolute_path)
+
+    session[:success] = "The file '#{params[:file]}' has been deleted."
+    status 302
+    homepage
+    # redirect "/"
+  else
+    #this ideally should be updated
+    handle404_page_not_found(path)
+  end
+  # erb "<p>post request submitted to #{params[:file]}</p>"
+end
+

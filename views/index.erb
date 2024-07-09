@@ -11,6 +11,9 @@
   <li>
     <a href="/<%= base_name(file_path) %>"><%= base_name(file_path) %></a>
     <a href="/<%= base_name(file_path) %>/edit">edit</a>
+    <form action="/files/delete/<%= base_name(file_path) %>" method="post" class="inline">
+      <input type="submit" name="delete_doc" value="delete">
+    </form>
   </li>
   <% end %>
 </ul>
