@@ -4,6 +4,7 @@ require 'sinatra/reloader'# unless ENV["RACK_ENV"] == "hack_test"# if (settings.
 
 require "tilt/erubis"
 require "redcarpet"
+require "yaml"
 require 'pry'
 
 def silly
@@ -57,7 +58,11 @@ def logged_in?
 end
 
 def credentials_correct?(username_input, password_input)
-  username_input == "admin" && password_input == "secret"
+  # users = {"admin"=>"secret", "bugs"=>"bunny"}
+  users = load_user_credentials
+  users[username_input] == password_input
+
+  # username_input == "admin" && password_input == "secret"
 end
 
 def data_path
@@ -66,6 +71,15 @@ def data_path
   else
     File.expand_path("../data", __FILE__)
   end
+end
+
+def load_user_credentials
+  credentials_path = if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/users.yaml", __FILE__)
+  else
+    File.expand_path("../users.yaml", __FILE__)
+  end
+  YAML.load_file(credentials_path)
 end
 
 def homepage()
