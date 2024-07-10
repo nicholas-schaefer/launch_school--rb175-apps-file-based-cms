@@ -17,3 +17,8 @@
   </li>
   <% end %>
 </ul>
+
+<div class="user-status"><p>Signed in as <%== session[:username] %>.</p></div>
+<form action="/authentication/logout" method="post">
+    <input type="submit" value="Sign Out">
+</form>

@@ -6,6 +6,10 @@ require "tilt/erubis"
 require "redcarpet"
 require 'pry'
 
+def silly
+  "silly"
+end
+
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
@@ -14,12 +18,13 @@ configure do
 end
 
 before do
-  # ENV['APP_ENV'] = "development"
-  # ENV["RACK_ENV"] = "development"
-  session[:flash_messages]  ||= []
-  session[:previous_path] ||= ""
-  # ENV["APP_ENV"] ||= "development"
-  # ENV["APP_ENV"] =
+  session[:user_is_authenticated]   ||= false
+  session[:flash_messages]          ||= []
+  session[:previous_path]           ||= ""
+  session[:username]                ||= ""
+  if !logged_in? && !(request.path_info == "/") && !(request.path_info == "/authentication/authenticate" && request.request_method == "POST")
+    redirect "/"
+  end
 end
 
 helpers do
@@ -34,6 +39,24 @@ helpers do
   def base_name(full_path)
     File.basename(full_path)
   end
+end
+
+def log_in
+  session[:user_is_authenticated] = true
+end
+
+def log_out
+  session[:user_is_authenticated] = false
+  session[:username] = ""
+  session[:success] = "You have been signed out."
+end
+
+def logged_in?
+  session[:user_is_authenticated]
+end
+
+def credentials_correct?(username_input, password_input)
+  username_input == "admin" && password_input == "secret"
 end
 
 def data_path
@@ -67,8 +90,45 @@ end
 #   markdown.render("# This will be a headline!")
 # end
 
+post '/authentication/authenticate' do
+  session[:username] = params[:username]
+  if credentials_correct?(params[:username], params[:password])
+    log_in
+    session[:success] = "Welcome!"
+    redirect "/"
+    # erb "<p>VICTORY</p><p>Username:#{params[:username]}</p><p>Password:#{params[:password]}</p>"
+  else
+    session[:error] = "Invalid Credentials."
+    status 422
+    redirect "/"
+    # erb "<p>Failure</p><p>Username:#{params[:username]}</p><p>Password:#{params[:password]}</p>"
+  end
+end
+
+post '/authentication/logout' do
+  log_out
+
+  redirect "/"
+  # if credentials_correct?(params[:username], params[:password])
+  #   session[:user_is_authenticated] = true
+  #   session[:success] = "Welcome!"
+  #   redirect "/"
+  #   # erb "<p>VICTORY</p><p>Username:#{params[:username]}</p><p>Password:#{params[:password]}</p>"
+  # else
+  #   session[:error] = "Invalid Credentials."
+  #   status 422
+  #   redirect "/"
+  #   # erb "<p>Failure</p><p>Username:#{params[:username]}</p><p>Password:#{params[:password]}</p>"
+  # end
+end
+
 get '/' do
-  homepage()
+  # homepage()
+  if logged_in?
+    homepage()
+  else
+    erb :index_logged_out
+  end
 end
 
 def handle_extension(absolute_path)

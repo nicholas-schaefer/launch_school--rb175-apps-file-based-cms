@@ -1,0 +1,26 @@
+<h2>Log in</h2>
+
+<% if session[:error] %>
+<div class="message">
+  <p><%= session.delete(:error) %></p>
+</div>
+<% end %>
+
+<% if session[:success] %>
+<div class="message">
+  <p><%= session.delete(:success) %></p>
+</div>
+<% end %>
+
+
+<form action="/authentication/authenticate" method="post">
+  <div>
+    <label for="username">Username</label>
+    <input type="text" name="username" id="username" value="<%== session[:username] %>">
+  </div>
+  <div>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password">
+  </div>
+    <input type="submit" name="sign_in" id="sign_in" value="Sign In">
+</form>
