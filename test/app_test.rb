@@ -39,14 +39,25 @@ class AppTest < Minitest::Test
     assert_equal false, session[:user_is_authenticated]
   end
 
+  def admin_session
+    {"rack.session" => { username: "admin", user_is_authenticated: true } }
+  end
+
   def signin_success_simulation
-    get "/", {}, {"rack.session" => { username: "admin", user_is_authenticated: true } }
+    get "/", {}, admin_session
     # post "/authentication/authenticate", username: "admin", password: "secret"
     # assert_equal 302, last_response.status
 
     # get last_response["Location"]
     # assert_includes last_response.body, "Welcome"
     # assert_includes last_response.body, "Signed in as admin"
+  end
+
+  def test_view_new_document_form_signed_out
+    get "/new"
+
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:error]
   end
 
   def test_index_logged_out_form

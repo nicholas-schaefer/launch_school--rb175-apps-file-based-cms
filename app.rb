@@ -23,6 +23,7 @@ before do
   session[:previous_path]           ||= ""
   session[:username]                ||= ""
   if !logged_in? && !(request.path_info == "/") && !(request.path_info == "/authentication/authenticate" && request.request_method == "POST")
+    session[:error] = "You must be signed in to do that."
     redirect "/"
   end
 end
@@ -60,8 +61,6 @@ def credentials_correct?(username_input, password_input)
 end
 
 def data_path
-  File.expand_path("../data", __FILE__)
-  ENV["RACK_ENV"]
   if ENV["RACK_ENV"] == "hack_test"
     File.expand_path("../test/data", __FILE__)
   else
