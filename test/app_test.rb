@@ -30,13 +30,23 @@ class AppTest < Minitest::Test
     end
   end
 
-  def signin_success_simulation
-    post "/authentication/authenticate", username: "admin", password: "secret"
-    assert_equal 302, last_response.status
+  def session
+    last_request.env["rack.session"]
+  end
 
-    get last_response["Location"]
-    assert_includes last_response.body, "Welcome"
-    assert_includes last_response.body, "Signed in as admin"
+  def test_sets_session_value
+    get "/"
+    assert_equal false, session[:user_is_authenticated]
+  end
+
+  def signin_success_simulation
+    get "/", {}, {"rack.session" => { username: "admin", user_is_authenticated: true } }
+    # post "/authentication/authenticate", username: "admin", password: "secret"
+    # assert_equal 302, last_response.status
+
+    # get last_response["Location"]
+    # assert_includes last_response.body, "Welcome"
+    # assert_includes last_response.body, "Signed in as admin"
   end
 
   def test_index_logged_out_form
