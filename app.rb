@@ -5,6 +5,7 @@ require 'sinatra/reloader'# unless ENV["RACK_ENV"] == "hack_test"# if (settings.
 require "tilt/erubis"
 require "redcarpet"
 require "yaml"
+require "bcrypt"
 require 'pry'
 
 def silly
@@ -58,10 +59,14 @@ def logged_in?
 end
 
 def credentials_correct?(username_input, password_input)
-  # users = {"admin"=>"secret", "bugs"=>"bunny"}
-  users = load_user_credentials
-  users[username_input] == password_input
+  credentials = load_user_credentials
 
+  if credentials.key?(username_input)
+    bcrypt_password = BCrypt::Password.new(credentials[username_input])
+    bcrypt_password == password_input
+  else
+    false
+  end
   # username_input == "admin" && password_input == "secret"
 end
 
